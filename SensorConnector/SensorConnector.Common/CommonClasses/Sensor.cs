@@ -2,6 +2,10 @@
 {
     public class Sensor
     {
+        public Sensor()
+        {
+        }
+
         public Sensor(string sensorIpAddress, int sensorPort)
         {
             IpAddress = sensorIpAddress;

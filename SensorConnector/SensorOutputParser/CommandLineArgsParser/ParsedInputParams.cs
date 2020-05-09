@@ -1,4 +1,5 @@
-﻿using SensorConnector.Common.CommonClasses;
+﻿using System;
+using SensorConnector.Common.CommonClasses;
 using System.Collections.Generic;
 
 namespace SensorOutputParser.CommandLineArgsParser
@@ -6,8 +7,8 @@ namespace SensorOutputParser.CommandLineArgsParser
     public class ParsedInputParams
     {
         public int TestId { get; set; }
-        public long LeftTimeBorder { get; set; } // in seconds
-        public long RightTimeBorder { get; set; } // in seconds
+        public DateTime LeftTimeBorder { get; set; }
+        public DateTime RightTimeBorder { get; set; }
         public List<Sensor> Sensors { get; set; }
     }
 }

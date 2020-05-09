@@ -1,4 +1,5 @@
-﻿using SensorConnector.Common.CommonClasses;
+﻿using System;
+using SensorConnector.Common.CommonClasses;
 using System.Collections.Generic;
 using System.Text;
 using static SensorConnector.Common.AppSettings;
@@ -9,16 +10,19 @@ namespace SensorOutputParser.Queries
     {
         public static string GetSensorOutputsForTest(
             int testId,
-            long leftTimeBorder,
-            long rightTimeBorder,
+            DateTime leftTimeBorder,
+            DateTime rightTimeBorder,
             List<Sensor> targetSensors)
         {
             var measurementName = MeasurementNameBase + testId;
 
+            var leftTimeBorderStr = leftTimeBorder.ToUniversalTime().ToString("O");
+            var rightTimeBorderStr = rightTimeBorder.ToUniversalTime().ToString("O");
+
             StringBuilder composedQueryString = new StringBuilder(
                                                                   $"SELECT * FROM {measurementName} " +
-                                                                  $"WHERE time >= {leftTimeBorder} AND " +
-                                                                  $"time <= {rightTimeBorder} AND "
+                                                                  $"WHERE time >= \'{leftTimeBorderStr}\' AND " +
+                                                                  $"time <= \'{rightTimeBorderStr}\' AND "
                                                                   );
 
             for (int i = 0; i < targetSensors.Count; i++)

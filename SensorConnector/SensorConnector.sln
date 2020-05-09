@@ -6,11 +6,14 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SensorOutputParser", "SensorOutputParser\SensorOutputParser.csproj", "{F40FB12F-77E4-4825-8FD9-8A6F789BAF9A}"
 	ProjectSection(ProjectDependencies) = postProject
 		{928F2ABC-EFB1-48C9-802A-994C07CB4161} = {928F2ABC-EFB1-48C9-802A-994C07CB4161}
+		{957AA0CD-57FC-4C0C-A231-C66144885040} = {957AA0CD-57FC-4C0C-A231-C66144885040}
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SensorConnector.Common", "SensorConnector.Common\SensorConnector.Common.csproj", "{928F2ABC-EFB1-48C9-802A-994C07CB4161}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SensorListener", "SensorListener\SensorListener.csproj", "{E9B5D0C2-206F-4AF9-A318-80EF8B00ED06}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SensorConnector.Persistence", "SensorConnector.Persistence\SensorConnector.Persistence.csproj", "{957AA0CD-57FC-4C0C-A231-C66144885040}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,6 +33,10 @@ Global
 		{E9B5D0C2-206F-4AF9-A318-80EF8B00ED06}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E9B5D0C2-206F-4AF9-A318-80EF8B00ED06}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E9B5D0C2-206F-4AF9-A318-80EF8B00ED06}.Release|Any CPU.Build.0 = Release|Any CPU
+		{957AA0CD-57FC-4C0C-A231-C66144885040}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{957AA0CD-57FC-4C0C-A231-C66144885040}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{957AA0CD-57FC-4C0C-A231-C66144885040}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{957AA0CD-57FC-4C0C-A231-C66144885040}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

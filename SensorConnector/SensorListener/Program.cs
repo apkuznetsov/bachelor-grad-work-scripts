@@ -115,7 +115,7 @@ namespace SensorListener
                         WriteReceivedBatchToInfluxDbAsync(senderIpAddress, senderPort, dataAsStr)
                              .ContinueWith(t =>
                              {
-                                 Console.WriteLine($"Wrote broadcast from {remoteIp} to InfluxDB");
+                                 Console.WriteLine($"Wrote broadcast from {remoteIp} to {AppSettings.DatabaseName}.{_measurementName}");
 
                              });
                     }
@@ -138,7 +138,7 @@ namespace SensorListener
             // TODO: Implement buffered writing
             var sensorOutput = new SensorOutput
             {
-                Timestamp = DateTime.Now,
+                Timestamp = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
                 SensorIpAddress = sensorIpAddress,
                 SensorPort = sensorPort,
                 Data = data

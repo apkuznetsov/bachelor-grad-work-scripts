@@ -6,11 +6,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="NJsonSchema.CodeGeneration.CSharp" Version="10.1.15" />
     <PackageReference Include="Vibrant.InfluxDB.Client" Version="4.0.3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\SensorConnector.Common\SensorConnector.Common.csproj" />
+    <ProjectReference Include="..\SensorConnector.Persistence\SensorConnector.Persistence.csproj" />
   </ItemGroup>
 
 </Project>
