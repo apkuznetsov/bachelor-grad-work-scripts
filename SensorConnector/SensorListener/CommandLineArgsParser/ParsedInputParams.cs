@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using SensorConnector.Common.CommonClasses;
+using System.Collections.Generic;
 
-namespace SensorConnector.CommandLineArgsParser
+namespace SensorListener.CommandLineArgsParser
 {
-    public class ParsedParamsDto
+    public class ParsedInputParams
     {
         public int TestId { get; set; }
         public int ProgramExecutionTime { get; set; } // in seconds

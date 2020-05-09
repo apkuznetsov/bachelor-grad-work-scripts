@@ -1,4 +1,7 @@
-﻿using SensorConnector.CommandLineArgsParser;
+﻿using SensorConnector.Common;
+using SensorConnector.Common.CommonClasses;
+using SensorConnector.Common.Entities;
+using SensorListener.CommandLineArgsParser;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,22 +13,16 @@ using System.Threading.Tasks;
 using Vibrant.InfluxDB.Client;
 using Timer = System.Timers.Timer;
 
-namespace SensorConnector
+namespace SensorListener
 {
     public class Program
     {
-        private static string _executionParamsStringExample =
-            "-testId 132 -executionTime 20 -sensors 127.0.0.1:1111 127.0.0.1:2222 127.2.2.2:3333";
-
-        private static int LISTEN_PORT = 8888; // local port for listening incoming data
-
         private static int _testId;
         private static int _programExecutionTime; // in seconds
         private static List<Sensor> _sensors;
 
         private static InfluxClient _client;
-        private static string _databaseName = "dms_influx_db";
-        private static string _measurementNameBase = "sensor_outputs_test_";
+
         private static string _measurementName;
 
         private static Timer _timer;
@@ -36,16 +33,15 @@ namespace SensorConnector
         {
             // Console.WriteLine("GetCommandLineArgs: {0}", string.Join(", ", args));
 
-            const string influxHost = "http://localhost:8086";
 
-            ParsedParamsDto parsedInputParams;
+            ParsedInputParams parsedInputParams;
 
             try
             {
                 #region Test
 
                 // WARNING: Remove or comment out this part for production.
-                var testArgs = _executionParamsStringExample.Split(' ');
+                var testArgs = AppSettings.SensorListener.ExecutionParamsStringExample.Split(' ');
                 args = testArgs;
 
                 #endregion Test
@@ -65,19 +61,19 @@ namespace SensorConnector
             _programExecutionTime = parsedInputParams.ProgramExecutionTime;
             _sensors = parsedInputParams.Sensors;
 
-            _measurementName = _measurementNameBase + _testId;
+            _measurementName = AppSettings.MeasurementNameBase + _testId;
 
-            _client = new InfluxClient(new Uri(influxHost));
+            _client = new InfluxClient(new Uri(AppSettings.InfluxHost));
 
             // var databases = await _client.ShowDatabasesAsync();
 
-            await _client.CreateDatabaseAsync(_databaseName); // creates db if not exist
+            await _client.CreateDatabaseAsync(AppSettings.DatabaseName); // creates db if not exist
 
             InitTimer(_programExecutionTime);
 
             try
             {
-                Console.WriteLine("Listening to port: {0}...", LISTEN_PORT);
+                Console.WriteLine("Listening to port: {0}...", AppSettings.SensorListener.ListenPort);
 
                 Thread receiveThread = new Thread(new ThreadStart(ReceiveMessage));
                 receiveThread.Start();
@@ -94,7 +90,7 @@ namespace SensorConnector
 
         private static void ReceiveMessage()
         {
-            UdpClient receiver = new UdpClient(LISTEN_PORT); // UdpClient for receiving incoming data
+            UdpClient receiver = new UdpClient(AppSettings.SensorListener.ListenPort); // UdpClient for receiving incoming data
 
             IPEndPoint remoteIp = null; // address of the sending server (NULL means Any)
 
@@ -150,9 +146,9 @@ namespace SensorConnector
 
             var outputs = new List<SensorOutput>() { sensorOutput };
 
-            await Task.Delay(2000);
+            // await Task.Delay(2000);
 
-            await _client.WriteAsync(_databaseName, _measurementName, outputs);
+            await _client.WriteAsync(AppSettings.DatabaseName, _measurementName, outputs);
         }
 
         /// <summary>

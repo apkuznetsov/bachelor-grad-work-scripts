@@ -1,12 +1,14 @@
-﻿using System;
+﻿using SensorConnector.Common.CommonClasses;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 
-namespace SensorConnector.CommandLineArgsParser
+namespace SensorOutputParser.CommandLineArgsParser
 {
     public static class CommandLineArgsParser
     {
+        /*
         private static readonly string _testIdParamName = "-testId";
         private static readonly string _executionTimeParamName = "-executionTime";
         private static readonly string _sensorsParamName = "-sensors";
@@ -20,7 +22,7 @@ namespace SensorConnector.CommandLineArgsParser
         // -testId {testId} -executionTime {executionTime} -sensors {sensorIpAddress:sensorPort} [{sensorIp:sensorPort}]
         private const string PARAMS_PATTERN = "-testId {testId} -executionTime {executionTime} -sensors {sensorIpAddress:sensorPort} [{sensorIp:sensorPort}]";
 
-        public static ParsedParamsDto ParseInputParams(string[] inputParams)
+        public static ParsedInputParams ParseInputParams(string[] inputParams)
         {
             int testId;
             int executionTime;
@@ -123,12 +125,13 @@ namespace SensorConnector.CommandLineArgsParser
                 i++;
             }
 
-            return new ParsedParamsDto()
+            return new ParsedInputParams()
             {
                 TestId = testId,
                 ProgramExecutionTime = executionTime,
                 Sensors = sensors
             };
         }
+        */
     }
 }

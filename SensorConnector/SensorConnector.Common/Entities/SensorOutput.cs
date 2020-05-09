@@ -1,7 +1,7 @@
 ﻿using System;
 using Vibrant.InfluxDB.Client;
 
-namespace SensorConnector
+namespace SensorConnector.Common.Entities
 {
     public class SensorOutput
     {

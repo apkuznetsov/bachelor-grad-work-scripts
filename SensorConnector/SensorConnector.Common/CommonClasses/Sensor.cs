@@ -1,4 +1,4 @@
-﻿namespace SensorConnector
+﻿namespace SensorConnector.Common.CommonClasses
 {
     public class Sensor
     {
