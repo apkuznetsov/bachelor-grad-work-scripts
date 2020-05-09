@@ -44,7 +44,7 @@ namespace UdpClient
                         //Console.WriteLine("server data: {0}", message);
 
 
-                        Console.WriteLine($"Received broadcast from {remoteIp}:");
+                        Console.WriteLine($"Received broadcast from {remoteIp}");
                         Console.WriteLine($" {Encoding.ASCII.GetString(data, 0, data.Length)}");
                     }
                 }

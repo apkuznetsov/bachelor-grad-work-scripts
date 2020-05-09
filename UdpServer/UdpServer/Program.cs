@@ -7,7 +7,7 @@ namespace UdpServer
 {
     class Program
     {
-        private static string _sendingIpAddress = "127.22.22.1";
+        private static string _sendingIpAddress = "127.22.22.22";
         // private static string _sendingIpAddress = "127.0.0.1";
         private static int _sendingPort = 6969;
 
@@ -16,26 +16,27 @@ namespace UdpServer
 
         static void Main(string[] args)
         {
-            // Console.Write("Enter ip address to send from: ");
-            // _sendingIpAddress = int.Parse(Console.ReadLine());
+            Console.Write("Enter IP address to send from: ");
+            _sendingIpAddress = Console.ReadLine();
 
             Console.Write("Enter port to send from: ");
             _sendingPort = int.Parse(Console.ReadLine());
 
-        try
+            try
             {
                 SendMessage();
-            }
+            }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
         }
+
         private static void SendMessage()
         {
             if (!IPAddress.TryParse(_sendingIpAddress, out IPAddress sendingIpAddress))
             {
-                throw new FormatException("Invalid ip-adress");
+                throw new FormatException("Invalid IP-address");
             }
 
             IPEndPoint localIpEndPoint = new IPEndPoint(sendingIpAddress, _sendingPort);
