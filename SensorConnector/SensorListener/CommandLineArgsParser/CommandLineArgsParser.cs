@@ -8,15 +8,22 @@ using static SensorConnector.Common.AppSettings.SensorListener;
 
 namespace SensorListener.CommandLineArgsParser
 {
+    /// <summary>
+    /// Parses app-execution input params.
+    /// </summary>
     public static class CommandLineArgsParser
     {
         private static readonly ParamParserHelper _paramParserHelper = new ParamParserHelper(InputParamsPattern);
 
+        /// <summary>
+        /// Parses app-execution input params according to predefined pattern. <br/>
+        /// Throws <i>FormatExceptions</i> if params provided to the application does not match the pattern.
+        /// </summary>
+        /// <param name="inputParams">App-execution input params represented as array os string.</param>
+        /// <returns>All parsed params as one object.</returns>
         public static ParsedInputParams ParseInputParams(string[] inputParams)
         {
-            int testId;
-            int executionTime;
-            List<Sensor> sensors = new List<Sensor>();
+            var parsedInputParams = new ParsedInputParams();
 
             var i = 0;
 
@@ -34,13 +41,13 @@ namespace SensorListener.CommandLineArgsParser
             _paramParserHelper.CheckParamValuePassed(inputParams, i, testIdParamName);
 
 
-            if (!int.TryParse(inputParams[1], out testId))
+            if (!int.TryParse(inputParams[1], out var testId))
             {
                 throw new FormatException(
                     $"Provided value \'{inputParams[1]}\' is not a valid TestId, because it can not be parsed to int.");
             }
 
-            testId = Math.Abs(testId);
+            parsedInputParams.TestId = Math.Abs(testId);
 
             i++;
 
@@ -50,7 +57,7 @@ namespace SensorListener.CommandLineArgsParser
 
             _paramParserHelper.CheckParamValuePassed(inputParams, i, executionTimeParamName);
 
-            if (!int.TryParse(inputParams[3], out executionTime))
+            if (!int.TryParse(inputParams[3], out var executionTime))
             {
                 throw new FormatException(
                     $"Provided value \'{inputParams[3]}\' is not a valid execution time, because it can not be parsed to int.");
@@ -65,6 +72,8 @@ namespace SensorListener.CommandLineArgsParser
                     $"Max allowed value is {maxExecutionTime}sec. (1 hour).");
             }
 
+            parsedInputParams.ProgramExecutionTime = executionTime;
+
             i++;
 
             _paramParserHelper.CheckParamPassed(inputParams, i, sensorsParamName);
@@ -76,17 +85,12 @@ namespace SensorListener.CommandLineArgsParser
                 _paramParserHelper.CheckParamValuePassed(inputParams, i, sensorsParamName);
                 var parsedSensor = _paramParserHelper.ParseSensorFromInput(inputParams[i]);
 
-                sensors.Add(parsedSensor);
+                parsedInputParams.Sensors.Add(parsedSensor);
 
                 i++;
             }
 
-            return new ParsedInputParams()
-            {
-                TestId = testId,
-                ProgramExecutionTime = executionTime,
-                Sensors = sensors
-            };
+            return parsedInputParams;
         }
     }
 }

@@ -6,6 +6,9 @@ using System.Text;
 
 namespace SensorOutputParser.Exporting
 {
+    /// <summary>
+    /// Creates Json-file from sensors outputs with parsed data.
+    /// </summary>
     internal class JsonExport
     {
         private readonly int _testId;

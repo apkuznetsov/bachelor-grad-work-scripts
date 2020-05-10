@@ -8,9 +8,19 @@ using static SensorConnector.Common.AppSettings.SensorOutputParser;
 
 namespace SensorOutputParser.CommandLineArgsParser
 {
+    /// <summary>
+    /// Parses app-execution input params.
+    /// </summary>
     public static class CommandLineArgsParser
     {
         private static readonly ParamParserHelper _paramParserHelper = new ParamParserHelper(InputParamsPattern);
+
+        /// <summary>
+        /// Parses app-execution input params according to predefined pattern. <br/>
+        /// Throws <i>FormatExceptions</i> if params provided to the application does not match the pattern.
+        /// </summary>
+        /// <param name="inputParams">App-execution input params represented as array os string.</param>
+        /// <returns>All parsed params as one object.</returns>
         public static ParsedInputParams ParseInputParams(string[] inputParams)
         {
             ParsedInputParams ParsedInputParams = new ParsedInputParams
@@ -67,6 +77,14 @@ namespace SensorOutputParser.CommandLineArgsParser
 
 
             ParsedInputParams.RightTimeBorder = rightTimeBorder;
+
+            // If left border is greater then right swap them
+            if (ParsedInputParams.LeftTimeBorder > ParsedInputParams.RightTimeBorder)
+            {
+                var tmp = ParsedInputParams.RightTimeBorder;
+                ParsedInputParams.RightTimeBorder = ParsedInputParams.LeftTimeBorder;
+                ParsedInputParams.LeftTimeBorder = tmp;
+            }
 
             i++;
 

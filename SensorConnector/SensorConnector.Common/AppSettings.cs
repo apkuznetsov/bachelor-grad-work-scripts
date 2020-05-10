@@ -2,6 +2,9 @@
 
 namespace SensorConnector.Common
 {
+    /// <summary>
+    /// Stores all constants and settings.
+    /// </summary>
     public static class AppSettings
     {
         public static string InfluxHost = "http://localhost:8086";
@@ -15,6 +18,9 @@ namespace SensorConnector.Common
         public static readonly int minPortValue = 1;
         public static readonly int maxPortValue = 65535;
 
+        /// <summary>
+        /// Stores constants and settings only related to the SensorListener app.
+        /// </summary>
         public static class SensorListener
         {
             public static int ListenPort = 8888; // local port for listening incoming data
@@ -34,6 +40,9 @@ namespace SensorConnector.Common
                 "-testId 555 -executionTime 2000 -sensors 127.0.0.1:1111 127.0.0.1:2222";
         }
 
+        /// <summary>
+        /// Stores constants and settings only related to the SensorOutputParser app.
+        /// </summary>
         public static class SensorOutputParser
         {
             public static readonly string directoryPathParamName = "-directoryPath";
@@ -57,9 +66,9 @@ namespace SensorConnector.Common
                                                       "[-testId {testId} -sensors {sensorIpAddress:sensorPort} [{sensorIp:sensorPort}]]";
 
             public static string ExecutionParamsStringExample =
-                "-directoryPath \"C:\\Users\\kurepin\\Desktop\\path test\" " +
-                "-leftTimeBorder 2020-05-11T07:32:29Z -rightTimeBorder 2020-05-09T19:32:29Z " +
-                "-testId 444 -sensors 127.0.0.1:1111 127.0.0.1:2222 " +
+                "-directoryPath path " +
+                "-leftTimeBorder 2020-05-01T07:32:29Z -rightTimeBorder 2020-05-11T19:32:29Z " +
+                "-testId 132 -sensors 127.0.0.1:1111 127.0.0.1:2222 " +
                 "-testId 555 -sensors 127.0.0.1:1111 127.0.0.1:2222";
 
             public static class AllowedTypeNames

@@ -1,9 +1,10 @@
 ﻿using SensorConnector.Common.Entities;
+using SensorConnector.Common.SensorExtensions;
 using SensorOutputParser.CommandLineArgsParser;
 using SensorOutputParser.Exporting;
 using SensorOutputParser.Queries;
 using System;
-using System.Text;
+using System.IO;
 using System.Threading.Tasks;
 using Vibrant.InfluxDB.Client;
 using static SensorConnector.Common.AppSettings;
@@ -25,7 +26,7 @@ namespace SensorOutputParser
         {
             _client = new InfluxClient(new Uri(InfluxHost));
 
-            await _client.CreateDatabaseAsync(DatabaseName); // creates db if not exist
+            await _client.CreateDatabaseAsync(DatabaseName); // Creates Influx database if not exist
 
             try
             {
@@ -62,16 +63,9 @@ namespace SensorOutputParser
 
                 if (series.Count < 1)
                 {
-                    StringBuilder sensorsToMessageString = new StringBuilder();
-
-                    foreach (var sensor in testSensorsInfo.Sensors)
-                    {
-                        sensorsToMessageString.Append(sensor + " ");
-                    }
-
                     Console.WriteLine(
-                        $"WARNING: For given time borders No outputs were found in Test-{testSensorsInfo.TestId} with sensors: " +
-                        $"{sensorsToMessageString}");
+                        $"WARNING: There were no outputs found for the specified parameters: \r\n" +
+                        GetSearchConditionsString(_parsedInputParams.LeftTimeBorder, _parsedInputParams.RightTimeBorder, testSensorsInfo));
 
                     continue;
                 }
@@ -97,25 +91,69 @@ namespace SensorOutputParser
 
                 var exportedFile = jsonExport.GetSensorOutputsFile();
 
-                var directoryPath = DefaultDirectoryPath;
+                // var directoryPath = DefaultDirectoryPath;
+                var directoryPath = _parsedInputParams.DirectoryPath;
 
-                /*
                 if (!Directory.Exists(directoryPath))
                 {
-                    Directory.CreateDirectory(directoryPath);
+                    try
+                    {
+                        Directory.CreateDirectory(directoryPath);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.Write("ERROR: Writing to file failed with the following message: ");
+                        Console.WriteLine(e);
+                    }
                 }
 
                 var path = $"{directoryPath}\\{exportedFile.FileName}";
 
-                File.WriteAllBytes(path, exportedFile.FileContents);
+                try
+                {
+                    File.WriteAllBytes(path, exportedFile.FileContents);
 
-                Console.WriteLine("Press any key to exit...");
-                Console.ReadKey();
-                */
-
+                    WriteSuccessMessage(
+                        _parsedInputParams.LeftTimeBorder,
+                        _parsedInputParams.RightTimeBorder,
+                        testSensorsInfo,
+                        exportedFile.FileName
+                        );
+                }
+                catch (Exception e)
+                {
+                    Console.Write("ERROR: Writing to file failed with the following message: ");
+                    Console.WriteLine(e);
+                }
             }
 
+            Console.WriteLine("Press any key to exit...");
+            Console.ReadKey();
+
             return 0;
+        }
+
+        private static string GetSearchConditionsString(DateTime leftTimeBorder,
+            DateTime rightTimeBorder,
+            ParsedTestSensorsInfo testSensorsInfo)
+        {
+            return $"{nameof(ParsedInputParams.LeftTimeBorder)}: {leftTimeBorder} \r\n" +
+                   $"{nameof(ParsedInputParams.RightTimeBorder)}: {rightTimeBorder} \r\n" +
+                   $"{nameof(ParsedTestSensorsInfo.TestId)}: {testSensorsInfo.TestId} \r\n" +
+                   $"{nameof(ParsedTestSensorsInfo.Sensors)}: {testSensorsInfo.Sensors.ListOfSensorsToString()} \r\n";
+        }
+
+        private static void WriteSuccessMessage(
+            DateTime leftTimeBorder,
+            DateTime rightTimeBorder,
+            ParsedTestSensorsInfo testSensorsInfo,
+            string fileName)
+        {
+            Console.WriteLine(
+                "SUCCESS: Outputs for the specified parameters: \r\n" +
+                GetSearchConditionsString(leftTimeBorder, rightTimeBorder, testSensorsInfo) +
+                $"Were successfully written to file {fileName}"
+                );
         }
     }
 }

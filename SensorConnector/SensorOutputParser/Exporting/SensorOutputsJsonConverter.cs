@@ -5,6 +5,9 @@ using System.Linq;
 
 namespace SensorOutputParser.Exporting
 {
+    /// <summary>
+    /// Overrides default JsonConverter and creates custom Json from the sensor output.
+    /// </summary>
     public class SensorOutputsJsonConverter : JsonConverter
     {
         private readonly Type[] _types;

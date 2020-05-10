@@ -54,7 +54,7 @@ namespace SensorListener
 
             // var databases = await _client.ShowDatabasesAsync();
 
-            await _client.CreateDatabaseAsync(AppSettings.DatabaseName); // creates db if not exist
+            await _client.CreateDatabaseAsync(AppSettings.DatabaseName); // Creates Influx database if not exist
 
             InitTimer(_parsedInputParams.ProgramExecutionTime);
 
@@ -79,7 +79,7 @@ namespace SensorListener
         {
             UdpClient receiver = new UdpClient(AppSettings.SensorListener.ListenPort); // UdpClient for receiving incoming data
 
-            IPEndPoint remoteIp = null; // address of the sending server (NULL means Any)
+            IPEndPoint remoteIp = null; // Address of the sending server (NULL means Any)
 
             try
             {
@@ -88,7 +88,7 @@ namespace SensorListener
 
                 while (true)
                 {
-                    byte[] data = receiver.Receive(ref remoteIp); // receive data from the server
+                    byte[] data = receiver.Receive(ref remoteIp); // Receive data from the server
 
                     var senderIpAddress = remoteIp.Address.ToString();
                     var senderPort = remoteIp.Port;

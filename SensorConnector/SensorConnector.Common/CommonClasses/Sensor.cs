@@ -1,7 +1,14 @@
 ﻿namespace SensorConnector.Common.CommonClasses
 {
+    /// <summary>
+    /// Represents sensor with basic information.
+    /// </summary>
     public class Sensor
     {
+        public string IpAddress { get; set; }
+
+        public int Port { get; set; }
+
         public Sensor()
         {
         }
@@ -12,12 +19,11 @@
             Port = sensorPort;
         }
 
-        public string IpAddress { get; set; }
-
-        public int Port { get; set; }
         public override string ToString()
         {
             return $"{IpAddress}:{Port}";
         }
+
+
     }
 }

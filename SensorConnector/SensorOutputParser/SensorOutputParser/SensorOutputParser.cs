@@ -13,10 +13,24 @@ using System.Threading.Tasks;
 
 namespace SensorOutputParser.SensorOutputParser
 {
+    /// <summary>
+    /// Gets sensor's datatype Json-schema from db. <br/>
+    /// Parses datatype schema and associate it with the sensor. <br/>
+    /// Parses sensor outputs according to their datatypes.
+    /// </summary>
     public static class SensorOutputParser
     {
+        /// <summary>
+        /// Stores all distinct sensors with their parsed datatype. 
+        /// </summary>
         public static List<SensorWithParsedDatatype> SensorWithParsedDatatypes { get; set; } = new List<SensorWithParsedDatatype>();
 
+        /// <summary>
+        /// Gets sensor's datatype Json-schema from db. <br/>
+        /// Puts distinct sensors with their parsed datatype in <i>SensorWithParsedDatatypes</i> list.
+        /// </summary>
+        /// <param name="sensors">List of sensors to retrieve from database and parse their datatypes.</param>
+        /// <returns></returns>
         public static async Task ParseSensorsDatatypeAsync(List<Sensor> sensors)
         {
             foreach (var sensor in sensors)
@@ -63,6 +77,14 @@ namespace SensorOutputParser.SensorOutputParser
             }
         }
 
+
+        /// <summary>
+        /// Parses raw data of given sensor outputs using the existing sensors binding to their datatypes. <br/>
+        /// It is assumed that sensors outputs raw data a string where sensor's values are separated by comma. <br/>
+        /// Pattern: <i>{fieldValue1},{fieldValue2}, ... ,{fieldValueN}</i>
+        /// </summary>
+        /// <param name="sensorOutputs">List of sensors outputs that were already retrieved from Influx database.</param>
+        /// <returns>List of parsed sensors outputs according the sensors datatypes.</returns>
         public static List<SensorOutputForExport> ParseRetrievedData(List<SensorOutput> sensorOutputs)
         {
             var result = new List<SensorOutputForExport>();
