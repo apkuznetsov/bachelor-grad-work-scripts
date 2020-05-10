@@ -4,7 +4,6 @@ using SensorOutputParser.CommandLineArgsParser;
 using SensorOutputParser.Exporting;
 using SensorOutputParser.Queries;
 using System;
-using System.IO;
 using System.Threading.Tasks;
 using Vibrant.InfluxDB.Client;
 using static SensorConnector.Common.AppSettings;
@@ -65,7 +64,8 @@ namespace SensorOutputParser
                 {
                     Console.WriteLine(
                         $"WARNING: There were no outputs found for the specified parameters: \r\n" +
-                        GetSearchConditionsString(_parsedInputParams.LeftTimeBorder, _parsedInputParams.RightTimeBorder, testSensorsInfo));
+                        GetSearchConditionsString(_parsedInputParams.LeftTimeBorder, _parsedInputParams.RightTimeBorder,
+                            testSensorsInfo));
 
                     continue;
                 }
@@ -94,31 +94,16 @@ namespace SensorOutputParser
                 // var directoryPath = DefaultDirectoryPath;
                 var directoryPath = _parsedInputParams.DirectoryPath;
 
-                if (!Directory.Exists(directoryPath))
-                {
-                    try
-                    {
-                        Directory.CreateDirectory(directoryPath);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.Write("ERROR: Writing to file failed with the following message: ");
-                        Console.WriteLine(e);
-                    }
-                }
-
-                var path = $"{directoryPath}\\{exportedFile.FileName}";
-
                 try
                 {
-                    File.WriteAllBytes(path, exportedFile.FileContents);
+                    FileWriter.WriteFileToDirectory(directoryPath, exportedFile.FileContents, exportedFile.FileName);
 
                     WriteSuccessMessage(
                         _parsedInputParams.LeftTimeBorder,
                         _parsedInputParams.RightTimeBorder,
                         testSensorsInfo,
                         exportedFile.FileName
-                        );
+                    );
                 }
                 catch (Exception e)
                 {
