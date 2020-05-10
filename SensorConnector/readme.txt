@@ -1,0 +1,1 @@
+Sensor connector is a common Visual Studio solution for the two application SensorListener and SensorOutputParser.
