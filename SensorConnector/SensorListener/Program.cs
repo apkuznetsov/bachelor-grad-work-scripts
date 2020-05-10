@@ -1,5 +1,4 @@
 ﻿using SensorConnector.Common;
-using SensorConnector.Common.CommonClasses;
 using SensorConnector.Common.Entities;
 using SensorListener.CommandLineArgsParser;
 using System;
@@ -17,9 +16,7 @@ namespace SensorListener
 {
     public class Program
     {
-        private static int _testId;
-        private static int _programExecutionTime; // in seconds
-        private static List<Sensor> _sensors;
+        private static ParsedInputParams _parsedInputParams;
 
         private static InfluxClient _client;
 
@@ -31,11 +28,6 @@ namespace SensorListener
 
         static async Task<int> MainAsync(string[] args)
         {
-            // Console.WriteLine("GetCommandLineArgs: {0}", string.Join(", ", args));
-
-
-            ParsedInputParams parsedInputParams;
-
             try
             {
                 #region Test
@@ -46,8 +38,7 @@ namespace SensorListener
 
                 #endregion Test
 
-
-                parsedInputParams = CommandLineArgsParser.CommandLineArgsParser.ParseInputParams(args);
+                _parsedInputParams = CommandLineArgsParser.CommandLineArgsParser.ParseInputParams(args);
             }
             catch (Exception ex)
             {
@@ -57,11 +48,7 @@ namespace SensorListener
                 return 1;
             }
 
-            _testId = parsedInputParams.TestId;
-            _programExecutionTime = parsedInputParams.ProgramExecutionTime;
-            _sensors = parsedInputParams.Sensors;
-
-            _measurementName = AppSettings.MeasurementNameBase + _testId;
+            _measurementName = AppSettings.MeasurementNameBase + _parsedInputParams.TestId;
 
             _client = new InfluxClient(new Uri(AppSettings.InfluxHost));
 
@@ -69,7 +56,7 @@ namespace SensorListener
 
             await _client.CreateDatabaseAsync(AppSettings.DatabaseName); // creates db if not exist
 
-            InitTimer(_programExecutionTime);
+            InitTimer(_parsedInputParams.ProgramExecutionTime);
 
             try
             {
@@ -129,7 +116,7 @@ namespace SensorListener
 
         private static bool IsTargetSensor(string ip, int port)
         {
-            return _sensors.FirstOrDefault(
+            return _parsedInputParams.Sensors.FirstOrDefault(
                 x => x.IpAddress.Equals(ip) && x.Port == port) != null;
         }
 

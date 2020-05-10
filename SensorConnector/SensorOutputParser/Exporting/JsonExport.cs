@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
-using System.Threading;
 
 namespace SensorOutputParser.Exporting
 {
@@ -20,9 +19,9 @@ namespace SensorOutputParser.Exporting
         }
 
         public JsonExport(
-            int testId, 
+            int testId,
             DateTime leftTimeBorder,
-            DateTime rightTimeBorder, 
+            DateTime rightTimeBorder,
             List<SensorOutputForExport> sensorOutputForExport)
         {
             _testId = testId;

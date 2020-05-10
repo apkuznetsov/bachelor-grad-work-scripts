@@ -1,6 +1,6 @@
-﻿using System;
+﻿using SensorConnector.Common.CommonClasses;
+using System;
 using System.Collections.Generic;
-using SensorConnector.Common.CommonClasses;
 
 namespace SensorOutputParser.Exporting
 {

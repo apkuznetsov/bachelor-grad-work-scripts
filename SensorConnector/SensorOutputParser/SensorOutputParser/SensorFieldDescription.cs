@@ -1,4 +1,4 @@
-﻿namespace SensorOutputParser
+﻿namespace SensorOutputParser.SensorOutputParser
 {
     public class SensorFieldDescription
     {

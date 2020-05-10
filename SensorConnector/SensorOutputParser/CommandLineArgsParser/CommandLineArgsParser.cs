@@ -1,137 +1,162 @@
-﻿using SensorConnector.Common.CommonClasses;
+﻿using SensorConnector.Common;
+using SensorConnector.Common.CommonClasses;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
+using static SensorConnector.Common.AppSettings;
+using static SensorConnector.Common.AppSettings.SensorOutputParser;
 
 namespace SensorOutputParser.CommandLineArgsParser
 {
     public static class CommandLineArgsParser
     {
-        /*
-        private static readonly string _testIdParamName = "-testId";
-        private static readonly string _executionTimeParamName = "-executionTime";
-        private static readonly string _sensorsParamName = "-sensors";
-
-        private const int MAX_EXECUTION_TIME = 3600; // in seconds (1 hour)
-
-        private const int MIN_PORT_VALUE = 1;
-        private const int MAX_PORT_VALUE = 65535;
-
-        // assuming input pattern is:
-        // -testId {testId} -executionTime {executionTime} -sensors {sensorIpAddress:sensorPort} [{sensorIp:sensorPort}]
-        private const string PARAMS_PATTERN = "-testId {testId} -executionTime {executionTime} -sensors {sensorIpAddress:sensorPort} [{sensorIp:sensorPort}]";
-
+        private static readonly ParamParserHelper _paramParserHelper = new ParamParserHelper(InputParamsPattern);
         public static ParsedInputParams ParseInputParams(string[] inputParams)
         {
-            int testId;
-            int executionTime;
-            List<Sensor> sensors = new List<Sensor>();
+            ParsedInputParams ParsedInputParams = new ParsedInputParams
+            {
+                TestSensorsInfo = new List<ParsedTestSensorsInfo>()
+            };
+
+            var i = 0;
 
             if (inputParams == null || !inputParams.Any())
             {
                 throw new FormatException(
                     $"No executing params were provided. " +
-                    $"Use the following pattern for the program executing: \r\n \'{PARAMS_PATTERN}\'");
+                    $"Use the following pattern for the program executing: \r\n \'{InputParamsPattern}\'");
             }
 
-            if (!inputParams[0].Equals(
-                _testIdParamName,
-                StringComparison.InvariantCultureIgnoreCase))
+            _paramParserHelper.CheckParamPassed(inputParams, i, directoryPathParamName);
+
+            i++;
+
+            _paramParserHelper.CheckParamValuePassed(inputParams, i, directoryPathParamName);
+
+            ParsedInputParams.DirectoryPath = inputParams[i];
+
+            i++;
+
+            _paramParserHelper.CheckParamPassed(inputParams, i, leftTimeBorderParamName);
+
+            i++;
+
+            if (!DateTime.TryParse(inputParams[i], out var leftTimeBorder))
             {
                 throw new FormatException(
-                    $"Expected \'{_testIdParamName}\' but found \'{inputParams[0]}\'.");
+                    $"Provided value \'{inputParams[i]}\' is not a valid DateTime value.\r\n" +
+                    $"Provide time borders in ISO-8601 format. Example: 2020-05-10T07:32:29Z");
             }
 
-            if (!int.TryParse(inputParams[1], out testId))
+            ParsedInputParams.LeftTimeBorder = leftTimeBorder;
+
+            i++;
+
+            _paramParserHelper.CheckParamPassed(inputParams, i, rightTimeBorderParamName);
+
+            i++;
+
+            _paramParserHelper.CheckParamValuePassed(inputParams, i, rightTimeBorderParamName);
+
+            if (!DateTime.TryParse(inputParams[i], out var rightTimeBorder))
             {
                 throw new FormatException(
-                    $"Provided value \'{inputParams[1]}\' is not a valid TestId, because it can not be parsed to int.");
-            }
-
-            testId = Math.Abs(testId);
-
-            if (!inputParams[2].Equals(
-                _executionTimeParamName,
-                StringComparison.InvariantCultureIgnoreCase))
-            {
-                throw new FormatException(
-                    $"Expected \'{_executionTimeParamName}\' but found \'{inputParams[2]}\'.");
-            }
-
-            if (!int.TryParse(inputParams[3], out executionTime))
-            {
-                throw new FormatException(
-                    $"Provided value \'{inputParams[3]}\' is not a valid execution time, because it can not be parsed to int.");
-            }
-
-            executionTime = Math.Abs(executionTime);
-
-            if (executionTime > MAX_EXECUTION_TIME)
-            {
-                throw new FormatException(
-                    $"Provided value {executionTime}sec. for execution time is too large. " +
-                    $"Max allowed value is {MAX_EXECUTION_TIME}sec. (1 hour).");
+                    $"Provided value \'{inputParams[i]}\' is not a valid DateTime value.\r\n" +
+                    $"Provide time borders in ISO-8601 format. Example: 2020-05-10T07:32:29Z");
             }
 
 
-            if (!inputParams[4].Equals(
-                _sensorsParamName,
-                StringComparison.InvariantCultureIgnoreCase))
+            ParsedInputParams.RightTimeBorder = rightTimeBorder;
+
+            i++;
+
+            var testSensorsInfoIndex = 0;
+            do
             {
-                throw new FormatException(
-                    $"Expected \'{_sensorsParamName}\' but found \'{inputParams[4]}\'.");
-            }
-
-            var i = 5;
-
-            while (i < inputParams.Length)
-            {
-                var splitSensorInfo = inputParams[i].Split(':');
-
-                if (splitSensorInfo.Length != 2)
+                try
                 {
-                    throw new FormatException(
-                        $"Provided value \'{inputParams[i]}\' is not a valid sensor info. " +
-                        "Expected pattern is \'{sensorIpAddress:sensorPort}\'");
+                    _paramParserHelper.CheckParamPassed(inputParams, i, testIdParamName);
                 }
-
-                var sensorIpAddress = splitSensorInfo[0];
-                var sensorPortStr = splitSensorInfo[1];
-
-                if (!IPAddress.TryParse(sensorIpAddress, out _))
+                catch (FormatException e)
                 {
+                    if (testSensorsInfoIndex == 0)
+                    {
+                        throw e;
+                    }
+
                     throw new FormatException(
-                        $"Provided value \'{sensorIpAddress}\' is not a valid sensor IP-address.");
+                        "Expected either  \'{sensorIpAddress}:{sensorPort}\' sensor info or \r\n" +
+                        $"\'{testIdParamName}\' parameter, but found {inputParams[i]}");
                 }
-
-                if (!int.TryParse(sensorPortStr, out var sensorPort))
-                {
-                    throw new FormatException(
-                        $"Provided value \'{sensorPortStr}\' is not a valid sensor port, because it can not be parsed to int.");
-                }
-
-                sensorPort = Math.Abs(sensorPort);
-
-                if (sensorPort < MIN_PORT_VALUE || sensorPort > MAX_PORT_VALUE)
-                {
-                    throw new FormatException(
-                        $"Provided value \'{sensorPort}\' for sensor port is not allowed. " +
-                        $"Allowed values are from {MIN_PORT_VALUE} to {MAX_PORT_VALUE}");
-                }
-
-                sensors.Add(new Sensor(sensorIpAddress, sensorPort));
 
                 i++;
-            }
 
-            return new ParsedInputParams()
-            {
-                TestId = testId,
-                ProgramExecutionTime = executionTime,
-                Sensors = sensors
-            };
+                _paramParserHelper.CheckParamValuePassed(inputParams, i, testIdParamName);
+
+                if (!int.TryParse(inputParams[i], out var testId))
+                {
+                    throw new FormatException(
+                        $"Provided value \'{inputParams[i]}\' is not a valid TestId, because it can not be parsed to int.");
+                }
+
+                ParsedInputParams.TestSensorsInfo.Add(
+                    new ParsedTestSensorsInfo()
+                    {
+                        TestId = Math.Abs(testId)
+                    });
+
+                i++;
+
+                _paramParserHelper.CheckParamPassed(inputParams, i, sensorsParamName);
+
+                i++;
+
+                var isFirstSensorInput = true;
+                do
+                {
+
+                    try
+                    {
+                        _paramParserHelper.CheckParamValuePassed(inputParams, i, sensorsParamName);
+                    }
+                    catch (FormatException e)
+                    {
+                        if (isFirstSensorInput)
+                        {
+                            throw e;
+                        }
+
+                        break;
+                    }
+
+                    Sensor parsedSensor = null;
+
+                    try
+                    {
+                        parsedSensor = _paramParserHelper.ParseSensorFromInput(inputParams[i]);
+                    }
+                    catch (FormatException e)
+                    {
+                        if (isFirstSensorInput)
+                        {
+                            throw e;
+                        }
+
+                        break;
+                    }
+
+                    ParsedInputParams.TestSensorsInfo[testSensorsInfoIndex].Sensors.Add(parsedSensor);
+
+                    i++;
+                    isFirstSensorInput = false;
+
+                } while (i < inputParams.Length);
+
+                testSensorsInfoIndex++;
+
+            } while (i < inputParams.Length);
+
+            return ParsedInputParams;
         }
-        */
     }
 }

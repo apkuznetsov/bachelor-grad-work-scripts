@@ -1,4 +1,4 @@
-cd C:\Users\kurepin\Desktop\Personal\Bachelor’s degree final project\Bachelor Project Repository\SensorConnector\SensorListener\bin\Debug\netcoreapp3.1
+cd C:\Users\kurepin\Desktop\Personal\Bachelor degree final project\Bachelor Project Repository\SensorConnector\SensorListener\bin\Debug\netcoreapp3.1
 
 SensorListener
 

@@ -1,267 +1,121 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json.Linq;
-using SensorConnector.Common;
-using SensorConnector.Common.Entities;
-using SensorConnector.Persistence;
+﻿using SensorConnector.Common.Entities;
 using SensorOutputParser.CommandLineArgsParser;
 using SensorOutputParser.Exporting;
 using SensorOutputParser.Queries;
 using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Vibrant.InfluxDB.Client;
 using static SensorConnector.Common.AppSettings;
-using Sensor = SensorConnector.Common.CommonClasses.Sensor;
+using static SensorConnector.Common.AppSettings.SensorOutputParser;
+using static SensorOutputParser.CommandLineArgsParser.CommandLineArgsParser;
+using static SensorOutputParser.SensorOutputParser.SensorOutputParser;
 
 namespace SensorOutputParser
 {
     public class Program
     {
-        private static List<ParsedInputParams> _parsedInputParamsList = new List<ParsedInputParams>();
-        private static List<SensorWithParsedDatatype> _sensorWithParsedDatatypes = new List<SensorWithParsedDatatype>();
+        private static ParsedInputParams _parsedInputParams;
 
         private static InfluxClient _client;
 
-        static void Main(string[] args) => MainAsync(args).GetAwaiter().GetResult();
+        static int Main(string[] args) => MainAsync(args).GetAwaiter().GetResult();
 
-        static async Task MainAsync(string[] args)
+        static async Task<int> MainAsync(string[] args)
         {
             _client = new InfluxClient(new Uri(InfluxHost));
 
-            // var databases = await _client.ShowDatabasesAsync();
-
             await _client.CreateDatabaseAsync(DatabaseName); // creates db if not exist
 
-            #region Test
-
-          _parsedInputParamsList.Add(new ParsedInputParams()
-          {
-              TestId = 444,
-              LeftTimeBorder = DateTime.SpecifyKind(DateTime.UtcNow.AddDays(-1), DateTimeKind.Utc),
-              RightTimeBorder = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(-2), DateTimeKind.Utc),
-              Sensors = new List<Sensor>()
-              {
-                  new Sensor("127.0.0.1", 1111),
-                  new Sensor("127.0.0.1", 3333)
-              }
-          });
-
-            #endregion Test
-
-            foreach (var item in _parsedInputParamsList)
+            try
             {
-                await ParseSensorsDatatypeAsync(item.Sensors);
+                #region Test
+
+                // WARNING: Remove or comment out this part for production.
+                var testArgs = ExecutionParamsStringExample.Split(' ');
+                args = testArgs;
+
+                #endregion Test
+
+                _parsedInputParams = ParseInputParams(args);
+            }
+            catch (Exception ex)
+            {
+                var errorMessage = "ERROR: execution params parsing failed.\r\n" + ex.Message;
+                Console.WriteLine(errorMessage);
+
+                return 1;
             }
 
-
-            var jsonString = "{\r\n    \"Temrerature\": \"double\",\r\n    \"Moisture\": \"int\",\r\n    \"Comment\": \"string\"\r\n}";
-
-            var parsedJson = JObject.Parse(jsonString);
-
-            var sensorFieldTypeNameDictionary = new Dictionary<string, string>();
-
-            var currentField = parsedJson.First;
-
-            while (currentField != null)
+            foreach (var testSensorsInfo in _parsedInputParams.TestSensorsInfo)
             {
-                var splitCurrentField = currentField
-                    .ToString()
-                    .Replace("\"", "")
-                    .Replace(" ", "")
-                    .Split(':');
+                var query = QueryMaker.GetSensorOutputsForTest(
+                    testSensorsInfo.TestId,
+                    _parsedInputParams.LeftTimeBorder,
+                    _parsedInputParams.RightTimeBorder,
+                    testSensorsInfo.Sensors);
 
-                var fieldName = splitCurrentField[0];
-                var fieldTypeName = splitCurrentField[1];
+                var resultSet = await _client.ReadAsync<SensorOutput>(DatabaseName, query);
 
-                sensorFieldTypeNameDictionary.Add(fieldName, fieldTypeName);
+                var results = resultSet.Results[0];
+                var series = results.Series;
 
-                currentField = currentField.Next;
-            }
-            
-            var query = QueryMaker.GetSensorOutputsForTest(
-                _parsedInputParamsList[0].TestId,
-                _parsedInputParamsList[0].LeftTimeBorder,
-                _parsedInputParamsList[0].RightTimeBorder,
-                _parsedInputParamsList[0].Sensors);
-
-            var resultSet = await _client.ReadAsync<SensorOutput>(DatabaseName, query);
-
-            // resultSet will contain 1 result in the Results collection (or multiple if you execute multiple queries at once)
-            var result = resultSet.Results[0];
-
-            // result will contain 1 series in the Series collection (or potentially multiple if you specify a GROUP BY clause)
-            var series = result.Series[0];
-
-            var outputs = series.Rows;
-
-            var outputsForExport = ParseRetrievedData(outputs);
-
-            var jsonExport = new JsonExport(
-                _parsedInputParamsList[0].TestId,
-                _parsedInputParamsList[0].LeftTimeBorder,
-                _parsedInputParamsList[0].RightTimeBorder,
-                outputsForExport);
-
-            var exportedFile = jsonExport.GetSensorOutputsFile();
-
-            var directoryPath = AppDomain.CurrentDomain.BaseDirectory + $"parsed-files";
-
-            /*
-            if (!Directory.Exists(directoryPath))
-            {
-                Directory.CreateDirectory(directoryPath);
-            }
-
-            var path = $"{directoryPath}\\{exportedFile.FileName}";
-
-            File.WriteAllBytes(path, exportedFile.FileContents);
-
-            Console.WriteLine("Press any key to exit...");
-            Console.ReadKey();
-            */
-        }
-
-        private static async Task ParseSensorsDatatypeAsync(List<Sensor> sensors)
-        {
-            foreach (var sensor in sensors)
-            {
-                if (_sensorWithParsedDatatypes
-                    .Any(x => x.IpAddress == sensor.IpAddress && x.Port == sensor.Port))
+                if (series.Count < 1)
                 {
-                    continue;
-                }
+                    StringBuilder sensorsToMessageString = new StringBuilder();
 
-                await using var context = new DmsDbContext();
-
-                var sensorWithDatatype = await context.Sensors
-                    .Include(x => x.DataType)
-                    .Include(x => x.CommunicationProtocol)
-                    .FirstOrDefaultAsync(x => x.IpAddress == sensor.IpAddress &&
-                                              x.Port == sensor.Port);
-
-                var parsedJson = JObject.Parse(sensorWithDatatype.DataType.Schema);
-
-                var sensorFieldDescriptions = new List<SensorFieldDescription>();
-
-                foreach (var property in parsedJson.Properties())
-                {
-                    var fieldName = property.Name;
-                    var fieldTypeName = property.Value.ToString();
-
-                    sensorFieldDescriptions.Add(
-                        new SensorFieldDescription(fieldName, fieldTypeName));
-                }
-
-                _sensorWithParsedDatatypes.Add(
-                    new SensorWithParsedDatatype()
+                    foreach (var sensor in testSensorsInfo.Sensors)
                     {
-                        SensorId = sensorWithDatatype.SensorId,
-                        IpAddress = sensorWithDatatype.IpAddress,
-                        Port = sensorWithDatatype.Port,
-                        FieldDescriptions = sensorFieldDescriptions
-                    });
-            }
-        }
+                        sensorsToMessageString.Append(sensor + " ");
+                    }
 
-        private static List<SensorOutputForExport> ParseRetrievedData(List<SensorOutput> sensorOutputs)
-        {
-            var result = new List<SensorOutputForExport>();
+                    Console.WriteLine(
+                        $"WARNING: For given time borders No outputs were found in Test-{testSensorsInfo.TestId} with sensors: " +
+                        $"{sensorsToMessageString}");
 
-            foreach (var sensorOutput in sensorOutputs)
-            {
-                var sensorFieldValues = new List<SensorFieldValue>();
-
-                var relatedSensor = _sensorWithParsedDatatypes
-                    .FirstOrDefault(x =>
-                        x.IpAddress.Equals(sensorOutput.SensorIpAddress) && x.Port.Equals(sensorOutput.SensorPort));
-
-                var rawData = sensorOutput.Data;
-                var splitRawData = rawData.Split(',');
-
-                if (splitRawData.Length != relatedSensor.FieldDescriptions.Count)
-                {
                     continue;
                 }
 
-                for (var i = 0; i < splitRawData.Length; i++)
+                var retrievedOutputs = series[0].Rows;
+
+                try
                 {
-                   var fieldDescription = relatedSensor.FieldDescriptions[i];
-
-                   var fieldValue = new SensorFieldValue()
-                   {
-                       FieldName = fieldDescription.FieldName
-                   };
-
-                   switch (fieldDescription.FieldTypeName)
-                   {
-                       case AppSettings.SensorOutputParser.AllowedTypeNames.Int:
-                       {
-                           if (int.TryParse(splitRawData[i], out var intValue))
-                           {
-                               fieldValue.FieldValue = intValue as int?;
-                           }
-
-                           break;
-                       }
-
-                       case AppSettings.SensorOutputParser.AllowedTypeNames.Double:
-                       {
-                           if (double.TryParse(
-                               splitRawData[i],
-                               NumberStyles.Any,
-                               CultureInfo.InvariantCulture, 
-                               out var doubleValue))
-                           {
-                               fieldValue.FieldValue = doubleValue as double?;
-                           }
-
-                           break;
-                       }
-
-                       case AppSettings.SensorOutputParser.AllowedTypeNames.String:
-                       {
-                           fieldValue.FieldValue = splitRawData[i] as string;
-
-                           break;
-                       }
-
-                       case AppSettings.SensorOutputParser.AllowedTypeNames.Bool:
-                       {
-                           if (int.TryParse(splitRawData[i], out var boolAsIntValue))
-                           {
-                               fieldValue.FieldValue = Convert.ToBoolean(boolAsIntValue);
-
-                               break;
-
-                           }
-
-                           if (bool.TryParse(splitRawData[i], out var boolValue))
-                           {
-                               fieldValue.FieldValue = boolValue as bool?;
-                           }
-
-                           break;
-                       }
-                   }
-
-                   sensorFieldValues.Add(fieldValue);
+                    await ParseSensorsDatatypeAsync(testSensorsInfo.Sensors);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
                 }
 
-                var outputForExport = new SensorOutputForExport()
-                {
-                    CollectedAt = sensorOutput.Timestamp,
-                    SensorId = relatedSensor.SensorId,
-                    IpAddress = sensorOutput.SensorIpAddress,
-                    Port = sensorOutput.SensorPort,
-                    ParsedData = sensorFieldValues
-                };
+                var outputsForExport = ParseRetrievedData(retrievedOutputs);
 
-                result.Add(outputForExport);
+                var jsonExport = new JsonExport(
+                    testSensorsInfo.TestId,
+                    _parsedInputParams.LeftTimeBorder,
+                    _parsedInputParams.RightTimeBorder,
+                    outputsForExport);
+
+                var exportedFile = jsonExport.GetSensorOutputsFile();
+
+                var directoryPath = DefaultDirectoryPath;
+
+                /*
+                if (!Directory.Exists(directoryPath))
+                {
+                    Directory.CreateDirectory(directoryPath);
+                }
+
+                var path = $"{directoryPath}\\{exportedFile.FileName}";
+
+                File.WriteAllBytes(path, exportedFile.FileContents);
+
+                Console.WriteLine("Press any key to exit...");
+                Console.ReadKey();
+                */
+
             }
 
-            return result;
+            return 0;
         }
     }
 }

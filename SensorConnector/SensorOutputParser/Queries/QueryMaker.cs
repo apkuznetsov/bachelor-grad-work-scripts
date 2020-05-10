@@ -1,5 +1,5 @@
-﻿using System;
-using SensorConnector.Common.CommonClasses;
+﻿using SensorConnector.Common.CommonClasses;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using static SensorConnector.Common.AppSettings;

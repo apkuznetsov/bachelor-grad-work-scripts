@@ -1,0 +1,32 @@
+cd C:\Users\kurepin\Desktop\Personal\Bachelor degree final project\Bachelor Project Repository\SensorConnector\SensorOutputParser\bin\Debug\netcoreapp3.1
+
+SensorOutputParser
+
+Assuming input pattern is:
+
+  -directoryPath {directoryPath}  -leftTimeBorder {leftTimeBorder} -rightTimeBorder {rightTimeBorder} -testId {testId} -sensors {sensorIpAddress:sensorPort} [{sensorIp:sensorPort}] [-testId {testId} -sensors {sensorIpAddress:sensorPort} [{sensorIp:sensorPort}]]
+
+  Maybe we should also pass here Influx and Postgres connection details:
+  
+  -infHost {influxHost} -infDb {influxDbName} -pgHost {pgHost} -pgPort {pgPort} -pgDb {pgDbName} -pgSchema {pgSchemaName} -pgUser {pgUsername} -pgPassword {pgPassword} + base pattern ...
+
+  DateTime must be provided in ISO 8601 format.
+
+ Example: 2020-05-10T07:32:29Z
+
+
+SensorOutputParser -directoryPath "C:\Users\kurepin\Desktop\path test" -leftTimeBorder 2020-05-09T07:32:29Z -rightTimeBorder 2020-05-09T19:32:29Z -testId 444 -sensors 127.0.0.1:1111 127.0.0.1:2222 -testId 555 -sensors 127.0.0.1:1111 127.0.0.1:2222
+
+
+SensorOutputParser -infHost http://localhost:8086 -infDb dms_influx_db -pgHost localhost -pgPort 5432 -pgDb MyDb -pgSchema dms_v9 -pgUser postgres -pgPassword kurepin -directoryPath "C:\Users\kurepin\Desktop\path test" -leftTimeBorder 2020-05-09T07:32:29Z -rightTimeBorder 2020-05-09T19:32:29Z -testId 444 -sensors 127.0.0.1:1111 127.0.0.1:2222 -testId 555 -sensors 127.0.0.1:1111 127.0.0.1:2222
+
+
+SensorOutputParser -testId 132 -executionTime 20 -sensors 127.0.0.1:1111 127.0.0.1:2222 127.2.2.2:3333
+
+SensorOutputParser -testId 444 -executionTime 2000 -sensors 127.0.0.1:1111
+
+
+
+
+
+

@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using SensorConnector.Common.CommonClasses;
+﻿using SensorConnector.Common.CommonClasses;
+using System.Collections.Generic;
 
-namespace SensorOutputParser
+namespace SensorOutputParser.SensorOutputParser
 {
     public class SensorWithParsedDatatype : Sensor
     {

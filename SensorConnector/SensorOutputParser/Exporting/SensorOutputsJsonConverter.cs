@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.VisualBasic.FileIO;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System;
+using System.Linq;
 
 namespace SensorOutputParser.Exporting
 {
@@ -18,7 +15,7 @@ namespace SensorOutputParser.Exporting
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
-        { 
+        {
             JToken jsJToken = JToken.FromObject(value);
 
             if (jsJToken.Type != JTokenType.Object)
@@ -45,36 +42,36 @@ namespace SensorOutputParser.Exporting
                     switch (fieldType)
                     {
                         case JTokenType.Integer:
-                        {
-                            var fieldValue = parsedDataToken.Value<int>(nameof(SensorFieldValue.FieldValue));
-                            newParsedDataJObject.Add(fieldName, (int)fieldValue);
+                            {
+                                var fieldValue = parsedDataToken.Value<int>(nameof(SensorFieldValue.FieldValue));
+                                newParsedDataJObject.Add(fieldName, (int)fieldValue);
 
-                            break;
-                        }
+                                break;
+                            }
 
                         case JTokenType.Float:
-                        {
-                            var fieldValue = parsedDataToken.Value<double>(nameof(SensorFieldValue.FieldValue));
-                            newParsedDataJObject.Add(fieldName, (double)fieldValue);
+                            {
+                                var fieldValue = parsedDataToken.Value<double>(nameof(SensorFieldValue.FieldValue));
+                                newParsedDataJObject.Add(fieldName, (double)fieldValue);
 
-                            break;
-                        }
+                                break;
+                            }
 
                         case JTokenType.Boolean:
-                        {
-                            var fieldValue = parsedDataToken.Value<bool>(nameof(SensorFieldValue.FieldValue));
-                            newParsedDataJObject.Add(fieldName, (bool)fieldValue);
+                            {
+                                var fieldValue = parsedDataToken.Value<bool>(nameof(SensorFieldValue.FieldValue));
+                                newParsedDataJObject.Add(fieldName, (bool)fieldValue);
 
-                            break;
-                        }
+                                break;
+                            }
 
                         default:
-                        {
-                            var fieldValue = parsedDataToken.Value<string>(nameof(SensorFieldValue.FieldValue));
-                            newParsedDataJObject.Add(fieldName, (string)fieldValue);
+                            {
+                                var fieldValue = parsedDataToken.Value<string>(nameof(SensorFieldValue.FieldValue));
+                                newParsedDataJObject.Add(fieldName, (string)fieldValue);
 
-                            break;
-                        }
+                                break;
+                            }
                     }
                 }
 
@@ -91,10 +88,7 @@ namespace SensorOutputParser.Exporting
             throw new NotImplementedException("Unnecessary because CanRead is false. The type will skip the converter.");
         }
 
-        public override bool CanRead
-        {
-            get { return false; }
-        }
+        public override bool CanRead => false;
 
         public override bool CanConvert(Type objectType)
         {

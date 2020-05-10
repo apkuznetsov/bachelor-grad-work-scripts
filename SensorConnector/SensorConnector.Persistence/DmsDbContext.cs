@@ -6,6 +6,7 @@ namespace SensorConnector.Persistence
 {
     public class DmsDbContext : DbContext
     {
+        private readonly string _connectionString;
         public DmsDbContext()
         {
         }
@@ -13,6 +14,11 @@ namespace SensorConnector.Persistence
         public DmsDbContext(DbContextOptions<DmsDbContext> options)
             : base(options)
         {
+        }
+
+        public DmsDbContext(string connectionString)
+        {
+            _connectionString = connectionString;
         }
 
         public virtual DbSet<CommunicationProtocol> CommunicationProtocols { get; set; }
@@ -24,7 +30,7 @@ namespace SensorConnector.Persistence
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=MyDb;Username=postgres;Password=kurepin");
+                optionsBuilder.UseNpgsql(_connectionString);
             }
         }
 
