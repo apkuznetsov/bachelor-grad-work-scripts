@@ -2,16 +2,15 @@
 
 namespace SensorConnector.Persistence.Entities
 {
-    public class Datatype
+    public class CommunicationProtocol
     {
-        public Datatype()
+        public CommunicationProtocol()
         {
             Sensors = new HashSet<Sensor>();
         }
 
-        public int DataTypeId { get; set; }
-        public string Metadata { get; set; }
-        public string Schema { get; set; }
+        public int CommunicationProtocolId { get; set; }
+        public string ProtocolName { get; set; }
 
         public virtual ICollection<Sensor> Sensors { get; set; }
     }

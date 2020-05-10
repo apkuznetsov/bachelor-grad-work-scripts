@@ -1,16 +1,16 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Linq;
+using SensorConnector.Common;
+using SensorConnector.Common.Entities;
+using SensorConnector.Persistence;
 using SensorOutputParser.CommandLineArgsParser;
+using SensorOutputParser.Exporting;
 using SensorOutputParser.Queries;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using SensorConnector.Common;
-using SensorConnector.Common.Entities;
-using SensorConnector.Persistence.Entities;
-using SensorOutputParser.Exporting;
 using Vibrant.InfluxDB.Client;
 using static SensorConnector.Common.AppSettings;
 using Sensor = SensorConnector.Common.CommonClasses.Sensor;
@@ -52,7 +52,7 @@ namespace SensorOutputParser
 
             foreach (var item in _parsedInputParamsList)
             {
-                ParseSensorsDatatype(item.Sensors);
+                await ParseSensorsDatatypeAsync(item.Sensors);
             }
 
 
@@ -106,8 +106,9 @@ namespace SensorOutputParser
 
             var exportedFile = jsonExport.GetSensorOutputsFile();
 
-            var directoryPath = AppDomain.CurrentDomain.BaseDirectory + $"parsed-files\\test-{_parsedInputParamsList[0].TestId}";
+            var directoryPath = AppDomain.CurrentDomain.BaseDirectory + $"parsed-files";
 
+            /*
             if (!Directory.Exists(directoryPath))
             {
                 Directory.CreateDirectory(directoryPath);
@@ -119,9 +120,10 @@ namespace SensorOutputParser
 
             Console.WriteLine("Press any key to exit...");
             Console.ReadKey();
+            */
         }
 
-        private static void ParseSensorsDatatype(List<Sensor> sensors)
+        private static async Task ParseSensorsDatatypeAsync(List<Sensor> sensors)
         {
             foreach (var sensor in sensors)
             {
@@ -131,31 +133,25 @@ namespace SensorOutputParser
                     continue;
                 }
 
-                /*
+                await using var context = new DmsDbContext();
 
-                // Gets Sensor with its datatype from Db
-                // var sensorWithDatatype _context.Sensors(x => x.SensorIp == sensorIp && x.SensorPort == sensorPort).Include(x.Datatype).FirstOrDefaultAsync;
+                var sensorWithDatatype = await context.Sensors
+                    .Include(x => x.DataType)
+                    .Include(x => x.CommunicationProtocol)
+                    .FirstOrDefaultAsync(x => x.IpAddress == sensor.IpAddress &&
+                                              x.Port == sensor.Port);
 
-                var parsedJson = JObject.Parse(sensorWithDatatype.Datatype.Schema);
+                var parsedJson = JObject.Parse(sensorWithDatatype.DataType.Schema);
 
-                var sensorFieldTypeNameDictionary = new Dictionary<string, string>();
+                var sensorFieldDescriptions = new List<SensorFieldDescription>();
 
-                var currentField = parsedJson.First;
-
-                while (currentField != null)
+                foreach (var property in parsedJson.Properties())
                 {
-                    var splitCurrentField = currentField
-                        .ToString()
-                        .Replace("\"", "")
-                        .Replace(" ", "")
-                        .Split(':');
+                    var fieldName = property.Name;
+                    var fieldTypeName = property.Value.ToString();
 
-                    var fieldName = splitCurrentField[0];
-                    var fieldTypeName = splitCurrentField[1];
-
-                    sensorFieldTypeNameDictionary.Add(fieldName, fieldTypeName);
-
-                    currentField = currentField.Next;
+                    sensorFieldDescriptions.Add(
+                        new SensorFieldDescription(fieldName, fieldTypeName));
                 }
 
                 _sensorWithParsedDatatypes.Add(
@@ -164,48 +160,9 @@ namespace SensorOutputParser
                         SensorId = sensorWithDatatype.SensorId,
                         IpAddress = sensorWithDatatype.IpAddress,
                         Port = sensorWithDatatype.Port,
-                        FieldTypeNames = sensorFieldTypeNameDictionary
+                        FieldDescriptions = sensorFieldDescriptions
                     });
-
-            */
             }
-
-            var jsonString =
-                "{\r\n    \"Temperature\": \"double\",\r\n    \"Moisture\": \"int\",\r\n    \"IsComfortLevel\": \"bool\",\r\n    \"Comment\": \"string\"\r\n}";
-
-            var sensorWithDatatype = new SensorConnector.Persistence.Entities.Sensor()
-            {
-                SensorId = 1234,
-                IpAddress = sensors[0].IpAddress,
-                Port = sensors[0].Port,
-                Metadata = "some metadata",
-                Datatype = new Datatype()
-                {
-                    Schema = jsonString
-                }
-            };
-
-            var parsedJson = JObject.Parse(sensorWithDatatype.Datatype.Schema);
-
-            var sensorFieldDescriptions = new List<SensorFieldDescription>();
-
-            foreach (var property in parsedJson.Properties())
-            {
-                var fieldName = property.Name;
-                var fieldTypeName = property.Value.ToString();
-
-                sensorFieldDescriptions.Add(
-                    new SensorFieldDescription(fieldName, fieldTypeName));
-            }
-
-            _sensorWithParsedDatatypes.Add(
-                new SensorWithParsedDatatype()
-                {
-                    SensorId = sensorWithDatatype.SensorId,
-                    IpAddress = sensorWithDatatype.IpAddress,
-                    Port = sensorWithDatatype.Port,
-                    FieldDescriptions = sensorFieldDescriptions
-                });
         }
 
         private static List<SensorOutputForExport> ParseRetrievedData(List<SensorOutput> sensorOutputs)
