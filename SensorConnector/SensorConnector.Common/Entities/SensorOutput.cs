@@ -1,8 +1,11 @@
 ﻿using System;
 using Vibrant.InfluxDB.Client;
 
-namespace SensorConnector
+namespace SensorConnector.Common.Entities
 {
+    /// <summary>
+    /// Represents data access object (DAO) to interact with Influx database.
+    /// </summary>
     public class SensorOutput
     {
         [InfluxTimestamp]
