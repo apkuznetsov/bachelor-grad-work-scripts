@@ -66,9 +66,9 @@ namespace SensorConnector.Common
                                                       "[-testId {testId} -sensors {sensorIpAddress:sensorPort} [{sensorIp:sensorPort}]]";
 
             public static string ExecutionParamsStringExample =
-                "-directoryPath path " +
+                "-directoryPath \"exported-files\" " +
                 "-leftTimeBorder 2020-05-01T07:32:29Z -rightTimeBorder 2020-05-11T19:32:29Z " +
-                "-testId 132 -sensors 127.0.0.1:1111 127.0.0.1:2222 " +
+                "-testId 444 -sensors 127.0.0.1:1111 127.0.0.1:2222 " +
                 "-testId 555 -sensors 127.0.0.1:1111 127.0.0.1:2222";
 
             public static class AllowedTypeNames
