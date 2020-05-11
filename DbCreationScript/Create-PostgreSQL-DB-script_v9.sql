@@ -5,7 +5,7 @@ CREATE TABLE dms_v9.datatypes
 (
  "DataTypeId" serial NOT NULL,
  "Metadata" text NOT NULL,
- "Schema"   jsonb NOT NULL,
+ "Schema"   json NOT NULL,
 	
  CONSTRAINT "PK_Datatypes" PRIMARY KEY ( "DataTypeId" )
 );
