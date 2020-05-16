@@ -23,18 +23,24 @@ namespace SensorOutputParser
 
         static async Task<int> MainAsync(string[] args)
         {
+            var x = InfluxHost;
             _client = new InfluxClient(new Uri(InfluxHost));
 
-            await _client.CreateDatabaseAsync(DatabaseName); // Creates Influx database if not exist
+            await _client.CreateDatabaseAsync(InfluxDatabaseName); // Creates Influx database if not exist
 
             try
             {
                 #region Test
 
-                // WARNING: Remove or comment out this part for production.
-                var testArgs = ExecutionParamsStringExample.Split(' ');
-                args = testArgs;
+                var isDebug = true;
 
+                if (isDebug)
+                {
+                    // WARNING: Remove or comment out this part for production.
+                    var testArgs = ExecutionParamsStringExample.Split(' ');
+                    args = testArgs;
+                }
+              
                 #endregion Test
 
                 _parsedInputParams = ParseInputParams(args);
@@ -55,7 +61,7 @@ namespace SensorOutputParser
                     _parsedInputParams.RightTimeBorder,
                     testSensorsInfo.Sensors);
 
-                var resultSet = await _client.ReadAsync<SensorOutput>(DatabaseName, query);
+                var resultSet = await _client.ReadAsync<SensorOutput>(InfluxDatabaseName, query);
 
                 var results = resultSet.Results[0];
                 var series = results.Series;
@@ -75,6 +81,11 @@ namespace SensorOutputParser
                 try
                 {
                     await ParseSensorsDatatypeAsync(testSensorsInfo.Sensors);
+                }
+                catch (Npgsql.PostgresException postgresException)
+                {
+                    Console.WriteLine("ERROR:" + postgresException.Message);
+                    return 1;
                 }
                 catch (Exception e)
                 {
@@ -137,7 +148,7 @@ namespace SensorOutputParser
             Console.WriteLine(
                 "SUCCESS: Outputs for the specified parameters: \r\n" +
                 GetSearchConditionsString(leftTimeBorder, rightTimeBorder, testSensorsInfo) +
-                $"Were successfully written to file {fileName}"
+                $"Were successfully written to file the \'{fileName}\'"
                 );
         }
     }
