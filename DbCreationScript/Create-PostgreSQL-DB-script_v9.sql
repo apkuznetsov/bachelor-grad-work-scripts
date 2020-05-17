@@ -68,7 +68,6 @@ CREATE TABLE dms_v9.storage_files
  "StorageFileId" serial NOT NULL,
  "URI"           text NOT NULL,
  "Description"   text NOT NULL,
- "IsInput"       boolean NOT NULL,
 	
  CONSTRAINT "PK_StorageFiles" PRIMARY KEY ( "StorageFileId" )
 );
@@ -79,6 +78,7 @@ CREATE TABLE dms_v9.test_storage_files
  "TestStorageFileId" serial NOT NULL,
  "StorageFileId"     int NOT NULL,
  "TestId"            int NOT NULL,
+ "IsInput"       boolean NOT NULL,
 	
  CONSTRAINT "PK_TestStorageFiles" PRIMARY KEY ( "TestStorageFileId" ),
 	
@@ -137,7 +137,6 @@ CREATE TABLE dms_v9.processing_sensors
 CREATE TABLE dms_v9.processed_data
 (
  "ProcessedDataId"     serial NOT NULL,
- "Metadata"            text NOT NULL,
  "ProcessingId" int NOT NULL,
  "StorageFileId"       int NOT NULL,
 	
