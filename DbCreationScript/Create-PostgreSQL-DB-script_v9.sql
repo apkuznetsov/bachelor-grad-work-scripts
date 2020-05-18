@@ -42,7 +42,7 @@ CREATE TABLE dms_v9.experiments
 (
  "ExperimentId" serial NOT NULL,
  "Metadata"     text NOT NULL,
- "CreatedAt"    time with time zone NOT NULL,
+ "CreatedAt"    timestamp with time zone NOT NULL,
 	
  CONSTRAINT "PK_Experiments" PRIMARY KEY ( "ExperimentId" )
 );
@@ -93,8 +93,8 @@ CREATE TABLE dms_v9.processings
 (
  "ProcessingId" serial NOT NULL,
  "Metadata"            text NOT NULL,
- "StartTimeBorder"     time with time zone NOT NULL,
- "EndTimeBorder"       time with time zone NOT NULL,
+ "StartTimeBorder"     timestamp with time zone NOT NULL,
+ "EndTimeBorder"       timestamp with time zone NOT NULL,
 	
  CONSTRAINT "PK_Processings" PRIMARY KEY ( "ProcessingId" )
 );
