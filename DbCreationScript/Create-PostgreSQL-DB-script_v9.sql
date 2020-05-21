@@ -153,8 +153,8 @@ CREATE TABLE dms_v9.processed_data
 -- ************************************** experiment_sensors
 CREATE TABLE dms_v9.experiment_sensors
 (
- "ExperimentId"       serial NOT NULL,
- "ExperimentSensorId" int NOT NULL,
+ "ExperimentSensorId" serial NOT NULL,
+ "ExperimentId"       int NOT NULL,
  "SensorId"           int NOT NULL,
 	
  CONSTRAINT "PK_ExperimentSensors" PRIMARY KEY ( "ExperimentSensorId" ),
