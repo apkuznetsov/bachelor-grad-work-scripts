@@ -59,7 +59,7 @@ Examples:
 
 ***************************** Json Datatype Schema *****************************
 
-Json Datatype Schema must match a specific pattern.
+Json Datatype Schema must match the specific pattern.
 
 	{
     	   "{fieldName}": "{fieldTypeName}",
