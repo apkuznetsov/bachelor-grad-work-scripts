@@ -1,7 +1,5 @@
-CREATE SCHEMA IF NOT EXISTS dms_v9;
-
--- ************************************** "datatypes"
-CREATE TABLE dms_v9.datatypes
+-- "datatypes"
+CREATE TABLE datatypes
 (
  "DataTypeId" serial NOT NULL,
  "Metadata" text NOT NULL,
@@ -10,8 +8,8 @@ CREATE TABLE dms_v9.datatypes
  CONSTRAINT "PK_Datatypes" PRIMARY KEY ( "DataTypeId" )
 );
 
--- ************************************** "communication_protocols"
-CREATE TABLE dms_v9.communication_protocols
+-- "communication_protocols"
+CREATE TABLE communication_protocols
 (
  "CommunicationProtocolId" serial NOT NULL,
  "ProtocolName"            varchar(20) NOT NULL,
@@ -19,8 +17,8 @@ CREATE TABLE dms_v9.communication_protocols
  CONSTRAINT "PK_CommunicationProtocols" PRIMARY KEY ( "CommunicationProtocolId" )
 );
 
--- ************************************** "sensors"
-CREATE TABLE dms_v9.sensors
+-- "sensors"
+CREATE TABLE sensors
 (
  "SensorId"                serial NOT NULL,
  "Metadata"                text NOT NULL,
@@ -32,13 +30,13 @@ CREATE TABLE dms_v9.sensors
  CONSTRAINT "PK_Sensors" PRIMARY KEY ( "SensorId" ),
 	
  CONSTRAINT "FK_Sensor_DataTypeId_Datatype" FOREIGN KEY ( "DataTypeId" ) 
-	REFERENCES dms_v9.datatypes ( "DataTypeId" ),
+	REFERENCES datatypes ( "DataTypeId" ),
  CONSTRAINT "FK_Sensor_CommunicationProtocolId_CommunicationProtocol" FOREIGN KEY ( "CommunicationProtocolId" ) 
-	REFERENCES dms_v9.communication_protocols ( "CommunicationProtocolId" )
+	REFERENCES communication_protocols ( "CommunicationProtocolId" )
 );
 
--- ************************************** "experiments"
-CREATE TABLE dms_v9.experiments
+-- "experiments"
+CREATE TABLE experiments
 (
  "ExperimentId" serial NOT NULL,
  "Metadata"     text NOT NULL,
@@ -47,8 +45,8 @@ CREATE TABLE dms_v9.experiments
  CONSTRAINT "PK_Experiments" PRIMARY KEY ( "ExperimentId" )
 );
 
--- ************************************** "tests"
-CREATE TABLE dms_v9.tests
+-- "tests"
+CREATE TABLE tests
 (
  "TestId"       serial NOT NULL,
  "Metadata"     text NOT NULL,
@@ -59,11 +57,11 @@ CREATE TABLE dms_v9.tests
  CONSTRAINT "PK_Tests" PRIMARY KEY ( "TestId" ),
 	
  CONSTRAINT "FK_Test_ExperimentId_Experiment" FOREIGN KEY ( "ExperimentId" ) 
-	REFERENCES dms_v9.experiments ( "ExperimentId" )
+	REFERENCES experiments ( "ExperimentId" )
 );
 
--- ************************************** "storage_files"
-CREATE TABLE dms_v9.storage_files
+-- "storage_files"
+CREATE TABLE storage_files
 (
  "StorageFileId" serial NOT NULL,
  "URI"           text NOT NULL,
@@ -72,8 +70,8 @@ CREATE TABLE dms_v9.storage_files
  CONSTRAINT "PK_StorageFiles" PRIMARY KEY ( "StorageFileId" )
 );
 
--- ************************************** "test_storage_files"
-CREATE TABLE dms_v9.test_storage_files
+-- "test_storage_files"
+CREATE TABLE test_storage_files
 (
  "TestStorageFileId" serial NOT NULL,
  "StorageFileId"     int NOT NULL,
@@ -83,13 +81,13 @@ CREATE TABLE dms_v9.test_storage_files
  CONSTRAINT "PK_TestStorageFiles" PRIMARY KEY ( "TestStorageFileId" ),
 	
  CONSTRAINT "FK_TestStorageFile_StorageFileId_StorageFile" FOREIGN KEY ( "StorageFileId" ) 
-	REFERENCES dms_v9.storage_files ( "StorageFileId" ),
+	REFERENCES storage_files ( "StorageFileId" ),
  CONSTRAINT "FK_TestStorageFile_TestId_Test" FOREIGN KEY ( "TestId" ) 
-	REFERENCES dms_v9.tests ( "TestId" )
+	REFERENCES tests ( "TestId" )
 );
 
--- ************************************** "processings"
-CREATE TABLE dms_v9.processings
+-- "processings"
+CREATE TABLE processings
 (
  "ProcessingId" serial NOT NULL,
  "Metadata"            text NOT NULL,
@@ -99,9 +97,9 @@ CREATE TABLE dms_v9.processings
  CONSTRAINT "PK_Processings" PRIMARY KEY ( "ProcessingId" )
 );
 
--- ************************************** "processing_tests"
+-- "processing_tests"
 
-CREATE TABLE dms_v9.processing_tests
+CREATE TABLE processing_tests
 (
  "ProcessingTestId"    serial NOT NULL,
  "ProcessingId" int NOT NULL,
@@ -111,14 +109,14 @@ CREATE TABLE dms_v9.processing_tests
 	
  CONSTRAINT "FK_ProcessingTest_ProcessingId_Processing" 
 	FOREIGN KEY ( "ProcessingId" ) 
-	REFERENCES dms_v9.processings ( "ProcessingId" ),
+	REFERENCES processings ( "ProcessingId" ),
  CONSTRAINT "FK_ProcessingTest_TestId_Test" 
 	FOREIGN KEY ( "TestId" ) 
-	REFERENCES dms_v9.tests ( "TestId" )
+	REFERENCES tests ( "TestId" )
 );
 
--- ************************************** "processing_sensors"
-CREATE TABLE dms_v9.processing_sensors
+-- "processing_sensors"
+CREATE TABLE processing_sensors
 (
  "ProcessingSensorId" serial NOT NULL,
  "ProcessingId"       int NOT NULL,
@@ -128,13 +126,13 @@ CREATE TABLE dms_v9.processing_sensors
 	
  CONSTRAINT "FK_ProcessingSensor_ProcessingId_Processing" 
 	FOREIGN KEY ( "ProcessingId" ) 
-	REFERENCES dms_v9.processings ( "ProcessingId" ),
+	REFERENCES processings ( "ProcessingId" ),
  CONSTRAINT "FK_ProcessingSensor_SensorId_Sensor" FOREIGN KEY ( "SensorId" ) 
-	REFERENCES dms_v9.sensors ( "SensorId" )
+	REFERENCES sensors ( "SensorId" )
 );
 
--- ************************************** "processed_data"
-CREATE TABLE dms_v9.processed_data
+-- "processed_data"
+CREATE TABLE processed_data
 (
  "ProcessedDataId"     serial NOT NULL,
  "ProcessingId" int NOT NULL,
@@ -144,14 +142,14 @@ CREATE TABLE dms_v9.processed_data
 	
  CONSTRAINT "FK_ProcessedData_ProcessingsId_Processing" 
 	FOREIGN KEY ( "ProcessingId" ) 
-	REFERENCES dms_v9.processings ( "ProcessingId" ),
+	REFERENCES processings ( "ProcessingId" ),
  CONSTRAINT "FK_ProcessedData_StorageFileId_StorageFile" 
 	FOREIGN KEY ( "StorageFileId" ) 
-	REFERENCES dms_v9.storage_files ( "StorageFileId" )
+	REFERENCES storage_files ( "StorageFileId" )
 );
 
--- ************************************** experiment_sensors
-CREATE TABLE dms_v9.experiment_sensors
+-- experiment_sensors
+CREATE TABLE experiment_sensors
 (
  "ExperimentSensorId" serial NOT NULL,
  "ExperimentId"       int NOT NULL,
@@ -160,13 +158,13 @@ CREATE TABLE dms_v9.experiment_sensors
  CONSTRAINT "PK_ExperimentSensors" PRIMARY KEY ( "ExperimentSensorId" ),
 	
  CONSTRAINT "FK_ExperimentSensor_ExperimentId_Experiment" FOREIGN KEY ( "ExperimentId" ) 
-	REFERENCES dms_v9.experiments ( "ExperimentId" ),
+	REFERENCES experiments ( "ExperimentId" ),
  CONSTRAINT "FK_ExperimentSensor_SensorId_Sensor" FOREIGN KEY ( "SensorId" ) 
-	REFERENCES dms_v9.sensors ( "SensorId" )
+	REFERENCES sensors ( "SensorId" )
 );
 
--- ************************************** "tags"
-CREATE TABLE dms_v9.tags
+-- "tags"
+CREATE TABLE tags
 (
  "TagId" serial NOT NULL,
  "Value" text NOT NULL,
@@ -174,8 +172,8 @@ CREATE TABLE dms_v9.tags
  CONSTRAINT "PK_Tags" PRIMARY KEY ( "TagId" )
 );
 
--- ************************************** "experiment_tags"
-CREATE TABLE dms_v9.experiment_tags
+-- "experiment_tags"
+CREATE TABLE experiment_tags
 (
  "ExperimentTagId" serial NOT NULL,
  "ExperimentId"    int NOT NULL,
@@ -184,13 +182,13 @@ CREATE TABLE dms_v9.experiment_tags
  CONSTRAINT "PK_ExperimentTags" PRIMARY KEY ( "ExperimentTagId" ),
 	
  CONSTRAINT "FK_ExperimentTag_ExperimentId_Experiment" FOREIGN KEY ( "ExperimentId" ) 
-	REFERENCES dms_v9.experiments ( "ExperimentId" ),
+	REFERENCES experiments ( "ExperimentId" ),
  CONSTRAINT "FK_ExperimentTag_TadId_Tag" FOREIGN KEY ( "TagId" ) 
-	REFERENCES dms_v9.tags ( "TagId" )
+	REFERENCES tags ( "TagId" )
 );
 
--- ************************************** "metadata_parameters"
-CREATE TABLE dms_v9.metadata_parameters
+-- "metadata_parameters"
+CREATE TABLE metadata_parameters
 (
  "MetadataParameterId" serial NOT NULL,
  "Name"                text NOT NULL,
@@ -199,8 +197,8 @@ CREATE TABLE dms_v9.metadata_parameters
  CONSTRAINT "PK_MetadataParameters" PRIMARY KEY ( "MetadataParameterId" )
 );
 
--- ************************************** "experiment_params"
-CREATE TABLE dms_v9.experiment_params
+-- "experiment_params"
+CREATE TABLE experiment_params
 (
  "ExperimentParamId"   serial NOT NULL,
  "ExperimentId"        int NOT NULL,
@@ -209,12 +207,12 @@ CREATE TABLE dms_v9.experiment_params
  CONSTRAINT "PK_ExperimentParams" PRIMARY KEY ( "ExperimentParamId" ),
 	
  CONSTRAINT "FK_ExperimentParam_ExperimentId_Experiment" FOREIGN KEY ( "ExperimentId" ) 
-	REFERENCES dms_v9.experiments ( "ExperimentId" ),
+	REFERENCES experiments ( "ExperimentId" ),
  CONSTRAINT "FK_ExperimentParam_MetadataParameterId_MetadataParameter" FOREIGN KEY ( "MetadataParameterId" ) 
-	REFERENCES dms_v9.metadata_parameters ( "MetadataParameterId" )
+	REFERENCES metadata_parameters ( "MetadataParameterId" )
 );
 
--- ************************************** "test_params"
+-- "test_params"
 CREATE TABLE dms_v9.test_params
 (
  "TestParamId"         serial NOT NULL,
@@ -224,12 +222,12 @@ CREATE TABLE dms_v9.test_params
  CONSTRAINT "PK_TestParams" PRIMARY KEY ( "TestParamId" ),
 	
  CONSTRAINT "FK_TestParam_TestId_Test" FOREIGN KEY ( "TestId" ) 
-	REFERENCES dms_v9.tests ( "TestId" ),
+	REFERENCES tests ( "TestId" ),
  CONSTRAINT "FK_TestParam_MetadataParameterId_MetadataParameter" FOREIGN KEY ( "MetadataParameterId" ) 
-	REFERENCES dms_v9.metadata_parameters ( "MetadataParameterId" )
+	REFERENCES metadata_parameters ( "MetadataParameterId" )
 );
 
--- ***************** Adding communication protocols *****************
+-- adding communication protocols
 INSERT INTO dms_v9.communication_protocols("ProtocolName")
 	VALUES 
 	('TCP'),
